@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Feature } from 'src/typeorm/entities/Feature';
 import { Repository } from 'typeorm';
-import { CreateFeatureParams } from './utils/types';
+import { CreateFeatureParams, UpdateFeatureParams } from './utils/types';
 
 @Injectable()
 export class FeaturesService {      // Responsible for all business logic, calling API's, etc
@@ -16,6 +16,14 @@ export class FeaturesService {      // Responsible for all business logic, calli
     createPost(featureDetails: CreateFeatureParams) {
         const newPost = this.featureRepository.create({...featureDetails, createdAt: new Date()});  // Not async
         this.featureRepository.save(newPost); // Async
+    }
+
+    updatePost(id: number, updatePostDetails: UpdateFeatureParams) {
+        return this.featureRepository.update({ id }, {...updatePostDetails, updatedAt: new Date()});
+    }
+
+    deletePost(id: number) {
+        return this.featureRepository.delete({ id });
     }
 }
 

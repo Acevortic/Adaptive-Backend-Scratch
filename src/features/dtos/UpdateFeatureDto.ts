@@ -1,7 +1,5 @@
-export class CreateFeaturedto {
-        
+export class UpdateFeatureDto{
     title: string;
     content: string;
-    createdAt: Date;
     updatedAt: Date;
 }
