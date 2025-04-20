@@ -14,6 +14,18 @@ export class FeaturesController {       // Handles incoming requests
         return posts;
     }
 
+    @Get(':id')
+    async getSinglePost(@Param('id') id: number) {
+        const post = await this.featureService.getSinglePost(id);
+        return post;
+    }
+
+    @Get('/count')
+    async countPosts() {
+        const totalLength = await this.featureService.countPosts();
+        return this.featureService.countPosts();
+    }
+
     @Post()
     createPosts(@Body() CreateFeaturedto: CreateFeaturedto) {
         return this.featureService.createPost(CreateFeaturedto);
