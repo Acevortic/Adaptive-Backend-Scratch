@@ -14,29 +14,33 @@ export class FeaturesController {       // Handles incoming requests
         return posts;
     }
 
-    @Get(':id')
+    @Get(':id')     // Gets a single blog post
     async getSinglePost(@Param('id') id: number) {
         const post = await this.featureService.getSinglePost(id);
         return post;
     }
 
-    @Get('/count')
+    @Get('/count')  // Counts all blog posts
     async countPosts() {
-        const totalLength = await this.featureService.countPosts();
         return this.featureService.countPosts();
     }
 
-    @Post()
+    // @Get('/search') 
+    // async searchPosts(@Param('term') term: string) {
+    //     return this.featureService.searchPosts();
+    // }
+
+    @Post()     // Create a new blog post
     createPosts(@Body() CreateFeaturedto: CreateFeaturedto) {
         return this.featureService.createPost(CreateFeaturedto);
     }
 
-    @Patch(':id')
+    @Patch(':id')   // Updates an existing blog post
     async updatePost(@Param('id', ParseIntPipe) id: number, @Body() updateFeatureDto: UpdateFeatureDto) {
         await this.featureService.updatePost(id, updateFeatureDto);
     }
 
-    @Delete(':id')
+    @Delete(':id')     // Deletes an existing blog post
     async deletePost(@Param('id', ParseIntPipe) id: number) {
         await this.featureService.deletePost(id);
     }

@@ -9,21 +9,32 @@ export class FeaturesService {      // Responsible for all business logic, calli
     constructor(@InjectRepository(Feature) private featureRepository: Repository<Feature>, 
     ) {}
 
-    getAllPosts() {     // This works no issues
+    getAllPosts() {    
         return this.featureRepository.find();
     }
 
+    searchPosts(title: string, content : string) {
+        // if (this.featureRepository.findBy({title: title}))
+        // return this.featureRepository.findBy({title: title, content: content});
+    }
+
     countPosts() {      // todo actually count posts, this is broken
-        const postsJson: any[] = Array.of(this.featureRepository.find());
-        console.log(postsJson);
-        return postsJson.length;
+        
+
     }
 
-    getSinglePost(id: number) { // Add logic for when the post is not found, actual http exception
-        return this.featureRepository.findOneBy({ id: id });
+    async getSinglePost(id: number): Promise<any> { 
+
+        const post = await this.featureRepository.findOneBy({id: id});
+
+        if (!post) {
+            throw new HttpException('The ID you searched for was not found.', HttpStatus.NOT_FOUND);
+        } else {
+            return this.featureRepository.findOneBy({ id: id });
+        }
     }
 
-    createPost(featureDetails: CreateFeatureParams) {       // Todo throw the actual http exception for it being a bad request. (400 bad request)
+    createPost(featureDetails: CreateFeatureParams) {     
         if (!featureDetails.title || !featureDetails.content) {
             throw new HttpException('Title or content was missing or empty. Cannot create the user.', HttpStatus.BAD_REQUEST);
         } else {
@@ -33,17 +44,24 @@ export class FeaturesService {      // Responsible for all business logic, calli
 
     }
 
-    updatePost(id: number, updatePostDetails: UpdateFeatureParams) {    // Todo throw the actual http exception for empty titles / content
+    async updatePost(id: number, updatePostDetails: UpdateFeatureParams): Promise<any> {  // Verify the bad request and not found exceptions actually work
+        const postToUpdate = await this.featureRepository.findOneBy({id: id});
         if (!updatePostDetails.title || !updatePostDetails.content) {
             throw new HttpException('Title or content was empty. Cannot update the user.', HttpStatus.BAD_REQUEST);
+        } else if (!postToUpdate) {
+            throw new HttpException('The ID you searched for was not found in the database.', HttpStatus.NOT_FOUND);
         } else {
             return this.featureRepository.update({ id }, {...updatePostDetails, updatedAt: new Date()});
         }
-       
     }
 
-    deletePost(id: number) {    // Add validation logic to check if the id exists
-        return this.featureRepository.delete({ id });
+    async deletePost(id: number): Promise<any> {  // Todo fix the status code from 200 to 204 no content
+        const postToDelete = await this.featureRepository.findOneBy({id: id});
+        if (!postToDelete) {
+            throw new HttpException('The ID you want to delte is not in the database.', HttpStatus.NOT_FOUND);
+        } else {
+            return this.featureRepository.delete({ id }), HttpStatus.NO_CONTENT;
+        }
     }
 }
 
