@@ -10,7 +10,7 @@ export class FeaturesService {      // Responsible for all business logic, calli
     ) {}
 
     createPost(featureDetails: CreateFeatureParams) {     
-        if (!featureDetails.title || !featureDetails.content) {
+        if (!featureDetails.title || !featureDetails.content) { // Condition where we won't interact with the database (invalid data)
             throw new HttpException('Title or content was missing or empty. Cannot create the user.', HttpStatus.BAD_REQUEST);
         } else {
             const newPost = this.featureRepository.create({...featureDetails, createdAt: new Date()});  // Not async
@@ -18,23 +18,23 @@ export class FeaturesService {      // Responsible for all business logic, calli
         }
     }
 
-    getAllPosts() {    
+    getAllPosts() {    // Return all posts that exist in the database
         return this.featureRepository.find();
     }
 
-    async searchPosts(title: string, content: string): Promise<any>  {   // Implement the logic for missing title / content. 
-        if (!title && content || !content && title) {
+    async searchPosts(title: string, content: string): Promise<any>  {  
+        if (!title && content || !content && title) {       // Condition where we will search the database
             const searchPost = await this.featureRepository.createQueryBuilder("Blog Posts")
             .where("LOWER(title) = LOWER(:title)", { title })
             .orWhere("LOWER(content) = LOWER(:content)", { content })
             .getMany();
             return searchPost;
-        } else {
+        } else {        // Condition where we don't need to search the database
             throw new HttpException('Title or content must be included to search. ', HttpStatus.BAD_REQUEST);
         }
     }
 
-    async countPosts() {      // todo actually count posts, this is broken
+    async countPosts() {      // Return the total number of posts in the database
         const totalPosts = await this.featureRepository.count({});
         console.log(totalPosts);
         return totalPosts;
@@ -63,9 +63,9 @@ export class FeaturesService {      // Responsible for all business logic, calli
         }
     }
 
-    async deletePost(id: number): Promise<any> {  // Todo fix the status code from 200 to 204 no content
+    async deletePost(id: number): Promise<any> {  // Returns 204 if the deletion was successful
         const postToDelete = await this.featureRepository.findOneBy({id: id});
-        if (!postToDelete) {
+        if (!postToDelete) {        // Not found error if the ID does not exist.
             throw new HttpException('The ID you want to delete is not in the database.', HttpStatus.NOT_FOUND);
         } else {
             return this.featureRepository.delete({ id });
