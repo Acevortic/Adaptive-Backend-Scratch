@@ -36,9 +36,11 @@ export class FeaturesService {      // Responsible for all business logic, calli
 
     async countPosts() {      // todo actually count posts, this is broken
         const totalPosts = await this.featureRepository.count({});
-        console.log("There are: " + totalPosts);
+        console.log(totalPosts);
+        return totalPosts;
+        // console.log("There are: " + totalPosts);
 
-        return JSON.stringify("{total: " + totalPosts + "}");  // NestJS automatically serializes to JSON though
+        // return JSON.stringify("{total: " + totalPosts + "}");  // NestJS automatically serializes to JSON though
     }
 
     async getSinglePost(id: number): Promise<any> { 
@@ -50,7 +52,7 @@ export class FeaturesService {      // Responsible for all business logic, calli
         }
     }
 
-    async updatePost(id: number, updatePostDetails: UpdateFeatureParams): Promise<any> {  // Verify the bad request and not found exceptions actually work
+    async updatePost(id: number, updatePostDetails: UpdateFeatureParams): Promise<any> {  // Verify the bad request logic 
         const postToUpdate = await this.featureRepository.findOneBy({id: id});
         if (!updatePostDetails.title && updatePostDetails.content || !updatePostDetails.content && updatePostDetails.title) {
             throw new HttpException('Title or content was empty. Cannot update the user.', HttpStatus.BAD_REQUEST);
@@ -66,7 +68,7 @@ export class FeaturesService {      // Responsible for all business logic, calli
         if (!postToDelete) {
             throw new HttpException('The ID you want to delete is not in the database.', HttpStatus.NOT_FOUND);
         } else {
-            return this.featureRepository.delete({ id }), HttpStatus.NO_CONTENT;
+            return this.featureRepository.delete({ id });
         }
     }
 }
