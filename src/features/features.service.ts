@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Feature } from 'src/typeorm/entities/Feature';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateFeatureParams, UpdateFeatureParams} from './utils/types';
 
 @Injectable()
@@ -23,31 +23,15 @@ export class FeaturesService {      // Responsible for all business logic, calli
     }
 
     async searchPosts(title: string, content: string): Promise<any>  {   // Implement the logic for missing title / content. 
-
-        const searchPost = await this.featureRepository.findBy({title: title, content: content});
-        
-        console.log(title);
-        console.log(content);
-        console.log(searchPost);
-        return searchPost;
-        // const searchPost = await this.featureRepository.findOneBy({title: title});
-        // console.log("Title is: " + title);
-        // console.log("Post is: " + searchPost);
-        // if (searchPost?.title != title) {
-        //     throw new HttpException('Didnt find, something messed up', HttpStatus.NOT_FOUND);
-        // }
-        // console.log("Title is: " + title);
-        // console.log("Post is: " + searchPost);
-        // return searchPost;
-        
-        // if(!title) {
-        //     throw new HttpException('The title parameter is missing or empty. ', HttpStatus.BAD_REQUEST);
-        // } else if (!searchPost) {
-        //     throw new HttpException('The post you were searching for was not found. ', HttpStatus.NOT_FOUND);
-        // }
-        // console.log(searchPost);
-
-        // return this.featureRepository.findOneBy({title});
+        if (!title && content || !content && title) {
+            const searchPost = await this.featureRepository.createQueryBuilder("Blog Posts")
+            .where("LOWER(title) = LOWER(:title)", { title })
+            .orWhere("LOWER(content) = LOWER(:content)", { content })
+            .getMany();
+            return searchPost;
+        } else {
+            throw new HttpException('Title or content must be included to search. ', HttpStatus.BAD_REQUEST);
+        }
     }
 
     async countPosts() {      // todo actually count posts, this is broken
@@ -68,7 +52,7 @@ export class FeaturesService {      // Responsible for all business logic, calli
 
     async updatePost(id: number, updatePostDetails: UpdateFeatureParams): Promise<any> {  // Verify the bad request and not found exceptions actually work
         const postToUpdate = await this.featureRepository.findOneBy({id: id});
-        if (!updatePostDetails.title || !updatePostDetails.content) {
+        if (!updatePostDetails.title && updatePostDetails.content || !updatePostDetails.content && updatePostDetails.title) {
             throw new HttpException('Title or content was empty. Cannot update the user.', HttpStatus.BAD_REQUEST);
         } else if (!postToUpdate) {
             throw new HttpException('The ID you searched for was not found in the database.', HttpStatus.NOT_FOUND);
