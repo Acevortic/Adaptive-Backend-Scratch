@@ -1,5 +1,4 @@
-export class CreateFeaturedto {
-        
+export class CreateFeatureDto {
     title: string;
     content: string;
     createdAt: Date;

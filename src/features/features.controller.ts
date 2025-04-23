@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Delete, Param, ParseIntPipe, Query, HttpCode } from '@nestjs/common';
-import { CreateFeaturedto } from './dtos/CreateFeaturedto';
+import { CreateFeatureDto } from './dtos/CreateFeatureDto';
 import { FeaturesService } from './features.service';
 import { UpdateFeatureDto } from './dtos/UpdateFeatureDto';
 
@@ -9,8 +9,8 @@ export class FeaturesController {       // Handles incoming requests
     constructor(private featureService: FeaturesService) {}
 
     @Post()     // Create a new blog post
-    createPost(@Body() CreateFeaturedto: CreateFeaturedto) {
-        return this.featureService.createPost(CreateFeaturedto);
+    createPost(@Body() CreateFeatureDto: CreateFeatureDto) {
+        return this.featureService.createPost(CreateFeatureDto);
     }
 
     @Get()
