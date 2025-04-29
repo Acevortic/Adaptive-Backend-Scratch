@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Delete, Param, ParseIntPipe, Query,
 import { CreateFeatureDto } from './dtos/CreateFeatureDto';
 import { FeaturesService } from './features.service';
 import { UpdateFeatureDto } from './dtos/UpdateFeatureDto';
+import { IsNotEmpty } from 'class-validator';
 
 @Controller('posts')
 export class FeaturesController {       // Handles incoming requests 
@@ -9,7 +10,7 @@ export class FeaturesController {       // Handles incoming requests
     constructor(private featureService: FeaturesService) {}
 
     @Post()     // Create a new blog post
-    createPost(@Body() CreateFeatureDto: CreateFeatureDto) {
+    async createPost(@Body() CreateFeatureDto: CreateFeatureDto) {
         return this.featureService.createPost(CreateFeatureDto);
     }
 

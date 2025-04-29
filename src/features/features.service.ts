@@ -9,17 +9,17 @@ export class FeaturesService {      // Responsible for all business logic, calli
     constructor(@InjectRepository(Feature) private featureRepository: Repository<Feature>, 
     ) {}
 
-    createPost(featureDetails: CreateFeatureParams) {     
+    async createPost(featureDetails: CreateFeatureParams) {     
         if (!featureDetails.title || !featureDetails.content) { // Condition where we won't interact with the database (invalid data)
             throw new HttpException('Title or content was missing or empty. Cannot create the user.', HttpStatus.BAD_REQUEST);
         } else {
-            const newPost = this.featureRepository.create({...featureDetails, createdAt: new Date()});  // Not async, creates a post
-            this.featureRepository.save(newPost); 
+            const newPost = await this.featureRepository.create({...featureDetails, createdAt: new Date()});  // Not async, creates a post
+            return await this.featureRepository.save(newPost); 
         }
     }
 
-    getAllPosts() {    // Return all posts that exist in the database as an array
-        return this.featureRepository.find();
+    async getAllPosts() {    // Return all posts that exist in the database as an array
+        return await this.featureRepository.find();
     }
 
     async searchPosts(title: string, content: string): Promise<any>  {  
@@ -34,7 +34,7 @@ export class FeaturesService {      // Responsible for all business logic, calli
             console.log(searchPost);
             return searchPost;
         } else {        // Condition where we don't need to search the database
-            throw new HttpException('Title or content must be included to search. ', HttpStatus.BAD_REQUEST);
+            throw new HttpException('Either title or content must be included to search. ', HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -49,9 +49,9 @@ export class FeaturesService {      // Responsible for all business logic, calli
         const post = await this.featureRepository.findOneBy({id: id});
         if (!post) {
             throw new HttpException('The ID you searched for was not found.', HttpStatus.NOT_FOUND);
-        } else {
-            return this.featureRepository.findOneBy({ id: id });
-        }
+        } 
+
+        return post;
     }
 
     async updatePost(id: number, updatePostDetails: UpdateFeatureParams): Promise<any> {  // Verify the bad request logic 
@@ -63,7 +63,7 @@ export class FeaturesService {      // Responsible for all business logic, calli
         if (!updatePostDetails.title && !updatePostDetails.content) {   // Hotfix for updating posts, would only update if both title and content passed in.
             throw new HttpException('Title and content was missing. cannot update. ', HttpStatus.BAD_REQUEST);
         } else if (updatePostDetails.title) {
-            return this.featureRepository.update({ id }, {...updatePostDetails, updatedAt: new Date()});
+            return this.featureRepository.update({ id }, {...updatePostDetails, updatedAt: new Date()});    // Overload
         } else if (updatePostDetails.content) {
             return this.featureRepository.update({ id }, {...updatePostDetails, updatedAt: new Date()});
         }
@@ -74,7 +74,7 @@ export class FeaturesService {      // Responsible for all business logic, calli
         if (!postToDelete) {        // Not found error if the ID does not exist.
             throw new HttpException('The ID you want to delete is not in the database.', HttpStatus.NOT_FOUND);
         } else {
-            return this.featureRepository.delete({ id });
+            return this.featureRepository.softDelete({ id });   // Don't fully delete
         }
     }
 }
