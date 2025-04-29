@@ -10,8 +10,8 @@ export class FeaturesController {       // Handles incoming requests
     constructor(private featureService: FeaturesService) {}
 
     @Post()     // Create a new blog post
-    async createPost(@Body() CreateFeatureDto: CreateFeatureDto) {
-        return this.featureService.createPost(CreateFeatureDto);
+    async createPost(@Body() createFeatureDto: CreateFeatureDto) {
+        return await this.featureService.createPost(createFeatureDto);
     }
 
     @Get()
@@ -21,16 +21,21 @@ export class FeaturesController {       // Handles incoming requests
     }
 
     @Get('/search') // Searches all posts in the database for matching titles / content
-    async searchPosts(@Query('title') title: string, @Query('content') content: string) {
-        const searchPost = await this.featureService.searchPosts(title, content);
+    async searchPosts(@Query('term') term: string) {
+        const searchPost = await this.featureService.searchPosts(term);
         return searchPost;
     }
+
+    // @Get('/search') // Searches all posts in the database for matching titles / content
+    // async searchPosts(@Query('title') title: string, @Query('content') content: string) {
+    //     const searchPost = await this.featureService.searchPosts(title, content);
+    //     return searchPost;
+    // }
 
     @Get('/count')  // Counts all blog posts
     async countPosts() {
         const totalPosts = await this.featureService.countPosts();
         return {"total:" : totalPosts};
-        // return await this.featureService.countPosts();
     }
 
     @Get(':id')     // Gets a single blog post

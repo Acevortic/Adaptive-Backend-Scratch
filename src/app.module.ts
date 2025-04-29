@@ -11,6 +11,7 @@ import { FeaturesModule } from './features/features.module';
       type: 'sqlite',
       database: 'database.sqlite',
       synchronize: true,
+      logging: true,
       entities: [Feature]
     }),
     FeaturesModule

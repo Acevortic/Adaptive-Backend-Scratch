@@ -14,8 +14,10 @@ export class Feature {
     @Column()
     createdAt: Date;
 
-    @Column( {nullable: true})  // This is here because of the initial null error since this isn't filled unless the post has been updated.
+    @Column( {nullable: true} )  // This is here because of the initial null error since this isn't filled unless the post has been updated.
     updatedAt: Date;
 
+    @Column( {nullable: true} ) // Todo fix the softdelete functionality
+    deletedAt: Date;
 
 }

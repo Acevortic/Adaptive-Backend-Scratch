@@ -2,71 +2,57 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Feature } from 'src/typeorm/entities/Feature';
 import { Repository } from 'typeorm';
-import { CreateFeatureParams, UpdateFeatureParams} from './utils/types';
+import { CreateFeatureDto } from './dtos/CreateFeatureDto';
+import { UpdateFeatureDto } from './dtos/UpdateFeatureDto';
 
 @Injectable()
 export class FeaturesService {      // Responsible for all business logic, calling API's, etc
     constructor(@InjectRepository(Feature) private featureRepository: Repository<Feature>, 
     ) {}
 
-    async createPost(featureDetails: CreateFeatureParams) {     
-        if (!featureDetails.title || !featureDetails.content) { // Condition where we won't interact with the database (invalid data)
-            throw new HttpException('Title or content was missing or empty. Cannot create the user.', HttpStatus.BAD_REQUEST);
-        } else {
-            const newPost = await this.featureRepository.create({...featureDetails, createdAt: new Date()});  // Not async, creates a post
-            return await this.featureRepository.save(newPost); 
-        }
+    async createPost(featureDetails: CreateFeatureDto) {     
+        const newPost = await this.featureRepository.create({...featureDetails, createdAt: new Date(), updatedAt: new Date()});  // Added updatedAt as adding is an update
+        return await this.featureRepository.save(newPost); 
+        
     }
 
     async getAllPosts() {    // Return all posts that exist in the database as an array
         return await this.featureRepository.find();
     }
 
-    async searchPosts(title: string, content: string): Promise<any>  {  
-        if (!title && content || !content && title) {       // Condition where we will search the database
-            const searchPost = await this.featureRepository.createQueryBuilder("Blog Posts")
-            .where("LOWER(title) = LOWER(:title)", { title })
-            .orWhere("LOWER(content) = LOWER(:content)", { content })
-            .getMany();
-            if(searchPost.length == 0) {    // Added the case where an empty array is returned if the title / content is not found. 
-                throw new HttpException('The title or content you searched for was not found in the database ', HttpStatus.NOT_FOUND);
-            }
-            console.log(searchPost);
-            return searchPost;
-        } else {        // Condition where we don't need to search the database
-            throw new HttpException('Either title or content must be included to search. ', HttpStatus.BAD_REQUEST);
+    async searchPosts(term): Promise<any>  {  
+        if (!term) {
+            throw new HttpException("Term parameter is empty or missing. ", HttpStatus.BAD_REQUEST);
         }
+
+        const searchPost = await this.featureRepository.createQueryBuilder("Blog Posts")
+        .where("LOWER(title) = LOWER(:term)", { term })
+        .orWhere("LOWER(content) = LOWER(:term)", { term })
+        .getMany();
+        
+        console.log(searchPost + "Found post!");
+        return searchPost;
     }
 
     async countPosts() {      // Return the total number of posts in the database
         const totalPosts = await this.featureRepository.count({});
         return totalPosts;
-       //  console.log(totalPosts);     // Debug for initial testing and implementation
-        // return JSON.stringify("{total: " + totalPosts + "}");  // NestJS automatically serializes to JSON, this isn't needed
     }
 
     async getSinglePost(id: number): Promise<any> { 
         const post = await this.featureRepository.findOneBy({id: id});
         if (!post) {
-            throw new HttpException('The ID you searched for was not found.', HttpStatus.NOT_FOUND);
+            throw new HttpException('The ID you searched for was not found.', HttpStatus.NOT_FOUND);    // This exception is fine (invalid ID)
         } 
-
         return post;
     }
 
-    async updatePost(id: number, updatePostDetails: UpdateFeatureParams): Promise<any> {  // Verify the bad request logic 
+    async updatePost(id: number, updateFeatureDto: UpdateFeatureDto): Promise<any> {  // Verify the bad request logic 
         const postToUpdate = await this.featureRepository.findOneBy({id: id});
         if (!postToUpdate) {    // If the post isn't found there's no need to update it
             throw new HttpException('The ID you searched for was not found in the database.', HttpStatus.NOT_FOUND);
         } 
-
-        if (!updatePostDetails.title && !updatePostDetails.content) {   // Hotfix for updating posts, would only update if both title and content passed in.
-            throw new HttpException('Title and content was missing. cannot update. ', HttpStatus.BAD_REQUEST);
-        } else if (updatePostDetails.title) {
-            return this.featureRepository.update({ id }, {...updatePostDetails, updatedAt: new Date()});    // Overload
-        } else if (updatePostDetails.content) {
-            return this.featureRepository.update({ id }, {...updatePostDetails, updatedAt: new Date()});
-        }
+        return this.featureRepository.update({ id }, {...updateFeatureDto, updatedAt: new Date()});
     }
 
     async deletePost(id: number): Promise<any> {  // Returns 204 if the deletion was successful
@@ -74,7 +60,7 @@ export class FeaturesService {      // Responsible for all business logic, calli
         if (!postToDelete) {        // Not found error if the ID does not exist.
             throw new HttpException('The ID you want to delete is not in the database.', HttpStatus.NOT_FOUND);
         } else {
-            return this.featureRepository.softDelete({ id });   // Don't fully delete
+            return this.featureRepository.delete({ id });   // Don't fully delete (Change to softdelete later)
         }
     }
 }
