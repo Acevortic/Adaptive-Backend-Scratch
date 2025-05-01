@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, DeleteDateColumn } from 'typeorm';
 
 @Entity({name: 'Blog Posts'})
 export class Feature {
@@ -17,7 +17,9 @@ export class Feature {
     @Column( {nullable: true} )  // This is here because of the initial null error since this isn't filled unless the post has been updated.
     updatedAt: Date;
 
-    @Column( {nullable: true} ) // Todo fix the softdelete functionality
-    deletedAt: Date;
+    // @Column( {nullable: true} ) // Todo fix the softdelete functionality
+    // DeleteDate: false;
 
+    @DeleteDateColumn({name: 'deletedAt', nullable: true})  // Implementation for soft delete
+    deletedAt?: Date;
 }

@@ -49,9 +49,15 @@ export class FeaturesController {       // Handles incoming requests
         await this.featureService.updatePost(id, updateFeatureDto);
     }
 
+    // @HttpCode(204)
+    // @Delete(':id')     // Deletes an existing blog post
+    // async deletePost(@Param('id', ParseIntPipe) id: number) {
+    //     await this.featureService.deletePost(id);
+    // }
+
     @HttpCode(204)
     @Delete(':id')     // Deletes an existing blog post
-    async deletePost(@Param('id', ParseIntPipe) id: number) {
-        await this.featureService.deletePost(id);
+    async softDelete(@Param('id', ParseIntPipe) id: number) {
+        await this.featureService.softDelete(id);
     }
 }

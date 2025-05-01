@@ -55,12 +55,21 @@ export class FeaturesService {      // Responsible for all business logic, calli
         return this.featureRepository.update({ id }, {...updateFeatureDto, updatedAt: new Date()});
     }
 
-    async deletePost(id: number): Promise<any> {  // Returns 204 if the deletion was successful
-        const postToDelete = await this.featureRepository.findOneBy({id: id});
+    // async deletePost(id: number): Promise<any> {  // Returns 204 if the deletion was successful
+    //     const postToDelete = await this.featureRepository.findOneBy({id: id});
+    //     if (!postToDelete) {        // Not found error if the ID does not exist.
+    //         throw new HttpException('The ID you want to delete is not in the database.', HttpStatus.NOT_FOUND);
+    //     }
+    //     return this.featureRepository.delete({ id });   // Don't fully delete (Change to softdelete later)
+    // }
+
+    async softDelete(id: number): Promise<any> {
+        const postToDelete = await this.featureRepository.findOneBy({id: id});  // Soft delete implementation
+        console.log(postToDelete);
         if (!postToDelete) {        // Not found error if the ID does not exist.
             throw new HttpException('The ID you want to delete is not in the database.', HttpStatus.NOT_FOUND);
         } else {
-            return this.featureRepository.delete({ id });   // Don't fully delete (Change to softdelete later)
+            return this.featureRepository.softDelete({ id });   // Don't fully delete (Change to softdelete later)
         }
     }
 }
